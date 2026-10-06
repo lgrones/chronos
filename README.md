@@ -40,21 +40,22 @@ If you want three of them, lift those three into your project.
 ```ts
 import { Chronos } from "chronos";
 
-const today = Chronos.today(); // Temporal.PlainDate
+const today = Temporal.Now.plainDateISO();
 
 Chronos(today).isBefore(deadline); // deadline is a plain Temporal.PlainDate
+Chronos(today).isSame(deadline, "month");
 Chronos(today).isBetween(start, end, { inclusive: true });
 
-Chronos(today).add(1, "day"); // singular or plural, whichever reads
-Chronos(today).subtract(3, "weeks");
-
 Chronos(today).startOf("month").add({ days: 14 }); // returns Temporal: native chain continues
-Chronos(today).format(); // "06.10.2026", de-AT by default
+
+const date = Chronos.parse("06.10.2026", Temporal.PlainDate); // de-AT by default
 ```
 
-Units follow the receiver. A `PlainDate` takes `day`, `week`, `month`, `year`; an
-`Instant` takes time units only. TypeScript rejects the rest, as Temporal would at
-runtime.
+Units follow the receiver. A `PlainDate` takes `year`, `month`, `week`, `day`; an
+`Instant` takes time units only. TypeScript rejects the rest.
+
+Where Temporal already reads well, Chronos stays out of the way: `add`,
+`subtract` and ISO parsing are plain Temporal.
 
 ### Requirements
 

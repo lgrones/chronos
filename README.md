@@ -1,6 +1,6 @@
 <div align="center">
   <img src="docs/assets/wordmark.svg" alt="Chronos" width="420">
-  <p><em>Method-style helpers over the Temporal API. Extension methods, without the syntactic sugar.</em></p>
+  <p><em>Method-style extensions for the Temporal API. Based on <a href="https://day.js.org/" rel="noopener" target="_blank">Day.js</a> syntax.</em></p>
   <p>
     <img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-blue">
     <img alt="TypeScript 7" src="https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white">
@@ -8,17 +8,17 @@
     <img alt="Status: early" src="https://img.shields.io/badge/status-early-orange">
   </p>
   <p>
-    <a href="#what-this-is">What this is</a> · <a href="#usage">Usage</a> · <a href="#the-contract">The contract</a> · <a href="#development">Development</a> · <a href="docs/plan.md">Plan</a>
+    <a href="#what-this-is">What this is</a> · <a href="#usage">Usage</a> · <a href="#contract">Contract</a> · <a href="#development">Development</a> · <a href="docs/plan.md">Plan</a>
   </p>
 </div>
 
 ## What this is
 
-Temporal fixes JavaScript dates: separate types for a date, a wall-clock time and
+Temporal fixes JavaScript dates: separate types for dates, time and
 an instant, real time zones, immutability. What it lacks is the dayjs reading
-order — `dayjs(a).isBefore(b)` reads left to right; `Temporal.PlainDate.compare(a, b) < 0`
+order — `dayjs(a).isBefore(b)` reads like a sentence left to right; `Temporal.PlainDate.compare(a, b) < 0`
 does not. C# would solve that with extension methods. JavaScript has none, so
-Chronos writes the `this` out:
+Chronos is a static wrapper:
 
 ```ts
 Chronos(today).isBefore(deadline);
@@ -26,14 +26,13 @@ Chronos(today).isBefore(deadline);
 
 **Chronos is not a date library, and does not want to become one.** Temporal is
 the date library. Chronos is a few dozen small functions that make Temporal read
-better, and it holds no data of its own.
+better.
 
 **Copy what you need.** Every helper is a few lines over a native Temporal call.
-If you want three of them, lift those three into your project — no dependency, no
-attribution beyond what the MIT licence asks.
+If you want three of them, lift those three into your project.
 
 > [!NOTE]
-> Early days. The API below is the target in [docs/plan.md](docs/plan.md), not
+> The API below is the target in [docs/plan.md](docs/plan.md), not
 > yet what `src` exports.
 
 ## Usage
@@ -66,10 +65,7 @@ Safari does not yet. Until it does, load a polyfill once at your entry point:
 import "temporal-polyfill/global";
 ```
 
-Chronos never imports a polyfill itself. Two `Temporal` implementations side by
-side would break `instanceof`.
-
-## The contract
+## Contract
 
 `Chronos(x)` lives for one expression. These rules keep it from becoming dayjs:
 

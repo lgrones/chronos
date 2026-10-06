@@ -1,1 +1,1 @@
-export {};
+export { Chronos } from "./chronos.ts";

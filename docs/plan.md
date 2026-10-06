@@ -55,8 +55,10 @@ Both return raw Temporal (rule 2). They map onto the native
 - **Dispatch**: explicit `instanceof` per type behind one TS overload per type.
   Not `value.constructor.compare` — harder to type, and it hides a
   `PlainDate`-vs-`ZonedDateTime` mistake.
-- **`isSame` on `ZonedDateTime`**: same instant (`compare === 0`) or same
-  instant, zone and calendar (`.equals`). Leaning same instant; document it.
+- **`isSame` on `ZonedDateTime`**: same instant (`compare === 0`), not
+  `.equals` (instant, zone and calendar). Matches dayjs, whose `isSame`
+  compares epoch milliseconds and ignores the zone. Trial decision — revisit
+  once a consumer has used it.
 - **Week start**: Monday (ISO, matches de-AT). Configurable only once a market
   needs Sunday.
 - **Locale**: `format` and `fromNow` default to `de-AT` with an optional

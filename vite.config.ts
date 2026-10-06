@@ -22,5 +22,27 @@ export default defineConfig({
       typeCheck: true,
     },
   },
+  test: {
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "native",
+          env: { TEMPORAL_IMPL: "native" },
+          include: ["test/**/*.test.ts"],
+          setupFiles: ["test/setup/native.ts"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "polyfill",
+          env: { TEMPORAL_IMPL: "polyfill" },
+          include: ["test/**/*.test.ts"],
+          setupFiles: ["test/setup/polyfill.ts"],
+        },
+      },
+    ],
+  },
   fmt: {},
 });

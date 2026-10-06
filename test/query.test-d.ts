@@ -10,6 +10,7 @@ declare const dateOrZoned: Temporal.PlainDate | Temporal.ZonedDateTime;
 
 // Same-type comparisons compile.
 Chronos(date).isBefore(date) satisfies boolean;
+Chronos(dateTime).isSameOrAfter(dateTime) satisfies boolean;
 Chronos(zoned).isBetween(zoned, zoned, { inclusive: true }) satisfies boolean;
 
 // @ts-expect-error cross-type comparison
@@ -18,6 +19,8 @@ Chronos(date).isBefore(zoned);
 Chronos(dateTime).isSame(date);
 // @ts-expect-error cross-type comparison
 Chronos(zoned).isAfter(instant);
+// @ts-expect-error cross-type comparison
+Chronos(instant).isSameOrBefore(date);
 // @ts-expect-error cross-type bounds
 Chronos(instant).isBetween(zoned, zoned);
 

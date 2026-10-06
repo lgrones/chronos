@@ -3,7 +3,7 @@ import { query, type Query } from "./query.ts";
 import { createComparable, type SupportedTemporalType } from "./comparable.ts";
 
 /** The methods `Chronos(value)` offers for a receiver of type `T`. */
-type Methods<T> = Query<T> & Manipulate<T>;
+type Methods<T extends SupportedTemporalType> = Query<T> & Manipulate<T>;
 
 /**
  * Wraps a Temporal value for one expression, so methods read left to right:

@@ -13,6 +13,16 @@ describe.each(Object.entries(ascending))("%s", (_, make) => {
     expect(chronos(mid).isSame(late)).toBe(false);
   });
 
+  it("isSameOrBefore / isSameOrAfter include equality", () => {
+    const [early, mid, late] = make();
+    expect(chronos(mid).isSameOrBefore(late)).toBe(true);
+    expect(chronos(mid).isSameOrBefore(mid)).toBe(true);
+    expect(chronos(mid).isSameOrBefore(early)).toBe(false);
+    expect(chronos(mid).isSameOrAfter(early)).toBe(true);
+    expect(chronos(mid).isSameOrAfter(mid)).toBe(true);
+    expect(chronos(mid).isSameOrAfter(late)).toBe(false);
+  });
+
   it("isBetween excludes the bounds by default, in either bound order", () => {
     const [early, mid, late] = make();
     expect(chronos(mid).isBetween(early, late)).toBe(true);
@@ -51,6 +61,7 @@ describe("runtime guards for untyped callers", () => {
   });
 
   it("rejects a string argument that Temporal.compare would coerce", () => {
+    // @ts-expect-error string argument
     expect(() => chronos(date()).isBefore("2026-10-07")).toThrow(TypeError);
   });
 
@@ -62,6 +73,7 @@ describe("runtime guards for untyped callers", () => {
   });
 
   it("rejects a Chronos passed as an argument", () => {
+    // @ts-expect-error Chronos as an argument
     expect(() => chronos(date()).isSame(chronos(date()))).toThrow(TypeError);
   });
 });

@@ -22,5 +22,9 @@ export const ascending = {
     ),
 };
 
-/** `Chronos` without its overloads, which reject the union receivers table-driven tests pass. */
-export const chronos = Chronos as (value: unknown) => Query<unknown> & Manipulate<unknown>;
+/**
+ * `Chronos` without its overloads, which reject the union receivers table-driven
+ * tests pass. Arguments are still typed, so a test that passes a string needs
+ * `@ts-expect-error`: the types reject it, and the test checks the runtime does too.
+ */
+export const chronos = Chronos as (value: unknown) => Query & Manipulate;

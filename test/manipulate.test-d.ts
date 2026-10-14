@@ -11,3 +11,14 @@ Chronos(date).clamp(date, date).add({ days: 1 }) satisfies Temporal.PlainDate;
 
 // @ts-expect-error cross-type bounds
 Chronos(date).clamp(zoned, zoned);
+
+// startOf / endOf yield raw Temporal of the receiver's type.
+Chronos(zoned).startOf("week") satisfies Temporal.ZonedDateTime;
+Chronos(date).endOf("month").add({ days: 1 }) satisfies Temporal.PlainDate;
+
+// @ts-expect-error time unit on PlainDate
+Chronos(date).startOf("hour");
+// @ts-expect-error calendar unit on Instant
+Chronos(instant).endOf("day");
+// @ts-expect-error plural unit
+Chronos(zoned).startOf("days");

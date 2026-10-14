@@ -1,4 +1,5 @@
 import { createComparable, type Comparable, type SupportedTemporalType } from "./comparable.ts";
+import { endOf, startOf, type UnitOf } from "./units.ts";
 
 /** Operations that yield a new value of the receiver's type, as raw Temporal. */
 export interface Manipulate<T extends SupportedTemporalType = SupportedTemporalType> {
@@ -8,6 +9,17 @@ export interface Manipulate<T extends SupportedTemporalType = SupportedTemporalT
    * @throws {RangeError} if `min` is after `max`.
    */
   clamp(min: T, max: T): T;
+  /**
+   * The first value of the `unit` that contains the receiver. Weeks start on
+   * Monday. On a `ZonedDateTime` a day starts when its zone says, which is not
+   * always midnight; on an `Instant` units are floored in UTC.
+   */
+  startOf(unit: UnitOf<T>): T;
+  /**
+   * The last value of the `unit` that contains the receiver: the last day on a
+   * `PlainDate`, otherwise one nanosecond before the next `unit` starts.
+   */
+  endOf(unit: UnitOf<T>): T;
 }
 
 /** Builds the manipulate methods for a comparable value. */
@@ -26,5 +38,7 @@ export function manipulate({ value, compare }: Comparable<SupportedTemporalType>
 
   return {
     clamp,
+    startOf: (unit) => startOf(value, unit),
+    endOf: (unit) => endOf(value, unit),
   };
 }

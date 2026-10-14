@@ -36,3 +36,19 @@ Chronos(date).isBefore(Chronos(date));
 
 // @ts-expect-error union receiver: would widen the argument and hide a mix
 Chronos(dateOrZoned);
+
+// Units follow the receiver's type.
+Chronos(date).isSame(date, "month") satisfies boolean;
+Chronos(zoned).isBefore(zoned, "hour") satisfies boolean;
+Chronos(instant).isAfter(instant, "millisecond") satisfies boolean;
+Chronos(dateTime).isBetween(dateTime, dateTime, {
+  unit: "week",
+  inclusive: true,
+}) satisfies boolean;
+
+// @ts-expect-error time unit on PlainDate
+Chronos(date).isSame(date, "hour");
+// @ts-expect-error calendar unit on Instant
+Chronos(instant).isBefore(instant, "day");
+// @ts-expect-error calendar unit on Instant
+Chronos(instant).isBetween(instant, instant, { unit: "month" });

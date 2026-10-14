@@ -56,8 +56,11 @@ The comparisons and `startOf` / `endOf` share one unit set, singular only:
 - `PlainDateTime`, `ZonedDateTime`: all of them.
 - `Instant`: `hour | minute | second | millisecond` — it has no calendar.
 
-A unit comparison compares `startOf(unit)` of both sides, as dayjs does:
-`Chronos(a).isSame(b, "month")` is true for any two days in October 2026.
+With a unit, the receiver stands for its whole unit, as in dayjs: `isSame`
+checks `b` lies between `startOf(unit)` and `endOf(unit)` of `a`, `isBefore`
+that `endOf(unit)` is before `b`. `Chronos(a).isSame(b, "month")` is true for
+any two days in October 2026. On a `ZonedDateTime` the receiver's zone decides
+where the unit starts and ends.
 Signatures follow dayjs where an options object would not read worse:
 `isSame(other, unit?)`, `isBetween(from, to, { inclusive?, unit? })`.
 

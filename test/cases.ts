@@ -1,4 +1,5 @@
 import { Chronos } from "../src/index.ts";
+import type { Display } from "../src/display.ts";
 import type { Manipulate } from "../src/manipulate.ts";
 import type { Query } from "../src/query.ts";
 import type { Range } from "../src/range.ts";
@@ -29,7 +30,7 @@ export const ascending = {
  * tests pass. Arguments are still typed, so a test that passes a string needs
  * `@ts-expect-error`: the types reject it, and the test checks the runtime does too.
  */
-export const chronos = Chronos as (value: unknown) => Query & Manipulate;
+export const chronos = Chronos as (value: unknown) => Query & Manipulate & Display;
 
 /** `Chronos.range` without its overloads. See `chronos`. */
 export const chronosRange = Chronos.range as (a: unknown, b: unknown) => Range;

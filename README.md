@@ -17,8 +17,7 @@
 Temporal fixes JavaScript dates: separate types for dates, time and
 an instant, real time zones, immutability. What it lacks is the dayjs reading
 order — `dayjs(a).isBefore(b)` reads like a sentence left to right; `Temporal.PlainDate.compare(a, b) < 0`
-does not. C# would solve that with extension methods. JavaScript has none, so
-Chronos is a static wrapper:
+does not. Chronos is a static wrapper to improve readability:
 
 ```ts
 Chronos(today).isBefore(deadline);
@@ -49,6 +48,8 @@ Chronos(today).isBetween(start, end, { inclusive: true });
 Chronos(today).startOf("month").add({ days: 14 }); // returns Temporal: native chain continues
 
 const date = Chronos.parse("06.10.2026", Temporal.PlainDate, "DD.MM.YYYY"); // strict ISO by default
+Chronos(date).format("DD.MM.YYYY"); // same tokens as parse
+Chronos(date).fromNow(); // "vor 3 Tagen"; de-AT unless given a locale
 ```
 
 Units follow the receiver. A `PlainDate` takes `year`, `month`, `week`, `day`; an

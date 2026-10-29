@@ -1,3 +1,4 @@
+import { display, type Display } from "./display.ts";
 import { manipulate, type Manipulate } from "./manipulate.ts";
 import { parse } from "./parse.ts";
 import { query, type Query } from "./query.ts";
@@ -6,7 +7,7 @@ import { assertSupported } from "./shared/compare.ts";
 import type { SupportedTemporalType } from "./shared/types.ts";
 
 /** The methods `Chronos(value)` offers for a receiver of type `T`. */
-type Methods<T extends SupportedTemporalType> = Query<T> & Manipulate<T>;
+type Methods<T extends SupportedTemporalType> = Query<T> & Manipulate<T> & Display<T>;
 
 /**
  * Wraps a Temporal value for one expression, so methods read left to right:
@@ -27,7 +28,7 @@ export function Chronos(value: Temporal.ZonedDateTime): Methods<Temporal.ZonedDa
 export function Chronos(value: Temporal.Instant): Methods<Temporal.Instant>;
 export function Chronos(value: SupportedTemporalType): Methods<SupportedTemporalType> {
   assertSupported(value);
-  return { ...query(value), ...manipulate(value) };
+  return { ...query(value), ...manipulate(value), ...display(value) };
 }
 
 Chronos.range = range;

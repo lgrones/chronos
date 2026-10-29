@@ -35,7 +35,7 @@ Temporal. Grouped as the dayjs docs group them.
 | **range**      | `Chronos.range(a, b)`: `overlaps`, `isBetween` — for a start–end pair, see below                            |
 | **parse**      | `Chronos.parse` — input into a chosen Temporal type, by a dayjs-style format; strict ISO by default         |
 | **statics**    | A shorter `Temporal.Now` — naming open, see below                                                           |
-| **display**    | Something around `Intl` (`format`, `fromNow`). Last; shape undecided.                                       |
+| **display**    | `format` by pattern or `Intl` options, `from` / `fromNow` — see below                                       |
 
 `PlainTime` and `PlainYearMonth` wait until something needs them.
 
@@ -134,6 +134,33 @@ Chronos.parse("06.10.2026 14:30", Temporal.ZonedDateTime, {
   (`DMYYYY`) only works with fixed-width tokens. Range checks are Temporal's
   (`overflow: "reject"`).
 
+### Display
+
+The receiver as text, by a pattern, by `Intl` options, or relative to another
+moment.
+
+```ts
+Chronos(start).format("DD.MM.YYYY HH:mm"); // "06.10.2026 14:30"
+Chronos(start).format({ dateStyle: "long" }); // "6. Oktober 2026"
+Chronos(start).from(end); // "vor 3 Tagen"
+Chronos(deadline).fromNow("en"); // "in 2 hours"
+```
+
+- **Pattern.** The tokens of `parse`, so a pattern formats and parses back the
+  same. A `PlainDate` pattern with a time throws. An `Instant` takes none: it
+  has no wall clock, convert it with `toZonedDateTimeISO` first.
+- **Intl.** An options object goes to `toLocaleString`, in `de-AT` unless a
+  `locale` is passed.
+- **Relative.** dayjs's `relativeTime` thresholds pick unit and count (45
+  seconds is a minute, 22 hours a day, 26 days a month); `Intl.RelativeTimeFormat`
+  writes it. Under 45 seconds is "jetzt", a `PlainDate` on the same day "heute";
+  otherwise numbers, so one day is "vor 1 Tag", not "gestern", as in dayjs.
+  `from` takes the reference; `fromNow` reads `Temporal.Now`.
+- **Time zone.** UTC wherever none is given: an `Instant` in `format` without
+  `options.timeZone`, now for a `PlainDate` or `PlainDateTime` in `fromNow`, and
+  where an `Instant` or `PlainDateTime` counts days and months. A
+  `ZonedDateTime` keeps its own zone, the receiver's deciding.
+
 ## Decisions to settle first
 
 - **Dispatch**: explicit `instanceof` per type behind one TS overload per type.
@@ -145,8 +172,10 @@ Chronos.parse("06.10.2026 14:30", Temporal.ZonedDateTime, {
   once a consumer has used it.
 - **Week start**: Monday (ISO, matches de-AT). Configurable only once a market
   needs Sunday.
-- **Locale**: `format` and `fromNow` default to `de-AT` with an optional
-  `locale` argument. No global mutable config.
+- **Locale**: `format`, `from` and `fromNow` default to `de-AT` with an
+  optional `locale` argument. No global mutable config.
+- **Time zone**: UTC where a value has none and the caller names none, never
+  the machine's zone.
 - **`endOf`**: the last representable value of the period, not the start of the
   next one — down to the nanosecond, since Temporal has them.
 - **`Instant` units**: `startOf("hour")` on an `Instant` floors in UTC. Fine for
@@ -187,7 +216,7 @@ dependencies.
    top of them, and `clamp`. Tested on native and polyfill.
 2. Ranges: `Chronos.range(a, b)` with `overlaps` and `isBetween`.
 3. `parse`.
-4. Display — settle what it is first.
+4. Display: `format`, `from`, `fromNow`.
 5. Move one real project off dayjs, write down what was missing, cut 1.0.
 
 ## Open
@@ -195,7 +224,7 @@ dependencies.
 - **Name.** Chronos sounds right; `chronos` on npm is likely taken, so a scoped
   name. Alternatives: Kairos, Tempo.
 - **Publishing.** npm public or GitHub Packages. `private: true` until decided.
-- **First consumer** for milestone 4.
+- **First consumer** for milestone 5.
 - **Current-time statics.** Agreed: `Temporal.Now.plainDateISO()` is clunky
   enough to wrap. Open: the names.
   - `Chronos.today()` / `Chronos.now()`: short, but `now()` hides that it is a

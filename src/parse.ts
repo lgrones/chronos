@@ -1,3 +1,5 @@
+import { tokenizer } from "./shared/tokens.ts";
+
 /** Options for parsing into a type that needs a time zone. */
 export interface ZonedParseOptions {
   /** The format `input` follows. Defaults to `YYYY-MM-DDTHH:mm`. */
@@ -99,9 +101,6 @@ const tokens: Partial<Record<string, Token>> = {
   SS: [/^\d{2}/, fraction],
   S: [/^\d/, fraction],
 };
-
-/** Splits a format into `[literal]` text, tokens and single characters. Longer tokens first. */
-const tokenizer = /\[([^\]]*)]|YYYY|YY|MM?|DD?|HH?|hh?|mm?|ss?|S{1,3}|A|a|./gs;
 
 /** Parses `input` into `type`. See `Parse`. */
 export const parse = ((

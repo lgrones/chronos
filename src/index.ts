@@ -1,4 +1,5 @@
 export { Chronos } from "./chronos.ts";
+export type { Display } from "./display.ts";
 export type { Manipulate } from "./manipulate.ts";
 export type { Parse, ZonedParseOptions } from "./parse.ts";
 export type { Query } from "./query.ts";

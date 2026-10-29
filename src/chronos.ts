@@ -1,6 +1,8 @@
 import { manipulate, type Manipulate } from "./manipulate.ts";
 import { query, type Query } from "./query.ts";
-import { assertSupported, type SupportedTemporalType } from "./shared/compare.ts";
+import { range } from "./range.ts";
+import { assertSupported } from "./shared/compare.ts";
+import type { SupportedTemporalType } from "./shared/types.ts";
 
 /** The methods `Chronos(value)` offers for a receiver of type `T`. */
 type Methods<T extends SupportedTemporalType> = Query<T> & Manipulate<T>;
@@ -26,3 +28,5 @@ export function Chronos(value: SupportedTemporalType): Methods<SupportedTemporal
   assertSupported(value);
   return { ...query(value), ...manipulate(value) };
 }
+
+Chronos.range = range;

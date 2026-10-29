@@ -103,7 +103,30 @@ describe("startOf / endOf", () => {
     expect(() => chronos(instant("2026-10-07T14:35Z")).endOf("day")).toThrow(
       /Instant has no unit day/,
     );
-    // @ts-expect-error plural unit
-    expect(() => chronos(dateTime("2026-10-07T14:35")).startOf("days")).toThrow(RangeError);
+    // @ts-expect-error unknown unit
+    expect(() => chronos(dateTime("2026-10-07T14:35")).startOf("fortnight")).toThrow(
+      /unknown unit fortnight/,
+    );
+  });
+
+  it("accepts every alias of a unit, case-sensitively", () => {
+    const value = dateTime("2026-10-07T14:35:12.345");
+    for (const [alias, unit] of [
+      ["years", "year"],
+      ["y", "year"],
+      ["M", "month"],
+      ["w", "week"],
+      ["d", "day"],
+      ["h", "hour"],
+      ["m", "minute"],
+      ["mins", "minute"],
+      ["s", "second"],
+      ["sec", "second"],
+      ["secs", "second"],
+      ["ms", "millisecond"],
+    ] as const) {
+      expectEqual(chronos(value).startOf(alias), chronos(value).startOf(unit));
+      expectEqual(chronos(value).endOf(alias), chronos(value).endOf(unit));
+    }
   });
 });

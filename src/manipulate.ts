@@ -1,5 +1,7 @@
-import { compare, type SupportedTemporalType } from "./shared/compare.ts";
-import { endOf, startOf, type UnitOf } from "./shared/bounds.ts";
+import { compareExact } from "./shared/compare.ts";
+import type { SupportedTemporalType } from "./shared/types.ts";
+import { endOf, startOf } from "./shared/bounds.ts";
+import type { UnitOf } from "./shared/units.ts";
 
 /** Operations that yield a new value of the receiver's type, as raw Temporal. */
 export interface Manipulate<T extends SupportedTemporalType = SupportedTemporalType> {
@@ -22,10 +24,10 @@ export interface Manipulate<T extends SupportedTemporalType = SupportedTemporalT
 export function manipulate(value: SupportedTemporalType): Manipulate {
   const clamp: Manipulate["clamp"] = (a, b) => {
     // Compare against the receiver first, so both bounds are type-checked.
-    const [toA, toB] = [compare(value, a), compare(value, b)];
+    const [toA, toB] = [compareExact(value, a), compareExact(value, b)];
 
-    if (toA < 0 && toB < 0) return compare(a, b) < 0 ? a : b;
-    if (toA > 0 && toB > 0) return compare(a, b) > 0 ? a : b;
+    if (toA < 0 && toB < 0) return compareExact(a, b) < 0 ? a : b;
+    if (toA > 0 && toB > 0) return compareExact(a, b) > 0 ? a : b;
     return value;
   };
 

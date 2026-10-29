@@ -1,9 +1,6 @@
-/** The Temporal types `Chronos` accepts as a receiver. */
-export type SupportedTemporalType =
-  | Temporal.PlainDate
-  | Temporal.PlainDateTime
-  | Temporal.ZonedDateTime
-  | Temporal.Instant;
+import { endOf, startOf } from "./bounds.ts";
+import type { SupportedTemporalType } from "./types.ts";
+import type { UnitOf } from "./units.ts";
 
 /**
  * Orders `value` against `other`: negative before, 0 same, positive after.
@@ -18,7 +15,7 @@ export type SupportedTemporalType =
  * @throws {TypeError} if `value` is not a supported Temporal type, or `other`
  * is not of `value`'s type.
  */
-export function compare(value: SupportedTemporalType, other: SupportedTemporalType): number {
+export function compareExact(value: SupportedTemporalType, other: SupportedTemporalType): number {
   const TemporalClass = classOf(value);
 
   if (!(other instanceof TemporalClass))
@@ -32,6 +29,35 @@ export function compare(value: SupportedTemporalType, other: SupportedTemporalTy
   ) => number;
 
   return compareSame(value, other);
+}
+
+/**
+ * Orders `value` against `other`: negative before, 0 same, positive after. With
+ * a `unit`, `value` stands for the whole `unit` that contains it: negative if
+ * the `unit` ends before `other`, positive if it starts after, 0 if `other` lies
+ * within it.
+ *
+ * @throws {TypeError} if `other` is not of `value`'s type.
+ */
+export function compare(
+  value: SupportedTemporalType,
+  other: SupportedTemporalType,
+  unit?: UnitOf<SupportedTemporalType>,
+): number {
+  if (unit === undefined) return compareExact(value, other);
+
+  if (compareExact(endOf(value, unit), other) < 0) return -1;
+  if (compareExact(startOf(value, unit), other) > 0) return 1;
+  return 0;
+}
+
+/**
+ * `a` and `b`, earlier first.
+ *
+ * @throws {TypeError} if `b` is not of `a`'s type.
+ */
+export function sort<T extends SupportedTemporalType>(a: T, b: T): [T, T] {
+  return compareExact(a, b) > 0 ? [b, a] : [a, b];
 }
 
 /**

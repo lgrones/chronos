@@ -1,35 +1,11 @@
-import type { SupportedTemporalType } from "./compare.ts";
-
-/** Units a calendar date has. */
-export type CalendarUnit = "year" | "month" | "week" | "day";
-/** Units a clock has. */
-export type TimeUnit = "hour" | "minute" | "second" | "millisecond";
-/** Every unit `startOf`, `endOf` and the comparisons accept. */
-export type Unit = CalendarUnit | TimeUnit;
-
-/**
- * The units a value of type `T` supports: a `PlainDate` has no clock, an
- * `Instant` no calendar, the others both.
- */
-export type UnitOf<T extends SupportedTemporalType> = T extends Temporal.PlainDate
-  ? CalendarUnit
-  : T extends Temporal.Instant
-    ? TimeUnit
-    : Unit;
-
-const calendarUnits: readonly Unit[] = ["year", "month", "week", "day"];
-const timeUnits: readonly Unit[] = ["hour", "minute", "second", "millisecond"];
-
-const plural = {
-  year: "years",
-  month: "months",
-  week: "weeks",
-  day: "days",
-  hour: "hours",
-  minute: "minutes",
-  second: "seconds",
-  millisecond: "milliseconds",
-} as const;
+import type { SupportedTemporalType } from "./types.ts";
+import {
+  resolveUnit,
+  type ResolvedUnit,
+  type TimeUnitName,
+  type Unit,
+  type UnitName,
+} from "./units.ts";
 
 /**
  * The first value of the `unit` that contains `value`. Weeks start on Monday.
@@ -39,18 +15,7 @@ const plural = {
  * @throws {RangeError} if `value` has no such unit, e.g. `"hour"` on a `PlainDate`.
  */
 export function startOf(value: SupportedTemporalType, unit: Unit): SupportedTemporalType {
-  check(value, unit);
-  if (value instanceof Temporal.PlainDate) return startOfDate(value, unit);
-  if (value instanceof Temporal.Instant) return value.round(floor(unit));
-
-  if (value instanceof Temporal.ZonedDateTime)
-    return calendarUnits.includes(unit)
-      ? startOfDate(value.toPlainDate(), unit).toZonedDateTime(value.timeZoneId)
-      : value.round(floor(unit));
-
-  return calendarUnits.includes(unit)
-    ? startOfDate(value.toPlainDate(), unit).toPlainDateTime()
-    : value.round(floor(unit));
+  return startOfUnit(value, resolve(value, unit));
 }
 
 /**
@@ -60,17 +25,36 @@ export function startOf(value: SupportedTemporalType, unit: Unit): SupportedTemp
  * @throws {RangeError} if `value` has no such unit, e.g. `"day"` on an `Instant`.
  */
 export function endOf(value: SupportedTemporalType, unit: Unit): SupportedTemporalType {
-  const start = startOf(value, unit);
-  const step = { [plural[unit]]: 1 };
+  const resolved = resolve(value, unit);
+  const start = startOfUnit(value, resolved);
+  // Temporal's plural duration fields are the unit names plus an s.
+  const step = { [`${resolved.name}s`]: 1 };
 
   if (start instanceof Temporal.PlainDate) return start.add(step).subtract({ days: 1 });
   // Floor again: a zoned day can start later than 00:00, and adding a day keeps
   // that wall-clock time even when the next day starts at midnight.
-  const next = startOf(add(start, step), unit) as Exclude<
+  const next = startOfUnit(add(start, step), resolved) as Exclude<
     SupportedTemporalType,
     Temporal.PlainDate
   >;
   return next.subtract({ nanoseconds: 1 });
+}
+
+function startOfUnit(
+  value: SupportedTemporalType,
+  { name, calendar }: ResolvedUnit,
+): SupportedTemporalType {
+  if (value instanceof Temporal.PlainDate) return startOfDate(value, name);
+  if (value instanceof Temporal.Instant) return value.round(floor(name));
+
+  if (value instanceof Temporal.ZonedDateTime)
+    return calendar
+      ? startOfDate(value.toPlainDate(), name).toZonedDateTime(value.timeZoneId)
+      : value.round(floor(name));
+
+  return calendar
+    ? startOfDate(value.toPlainDate(), name).toPlainDateTime()
+    : value.round(floor(name));
 }
 
 /** `value.add(duration)` without a union-typed receiver. */
@@ -78,7 +62,7 @@ function add(value: SupportedTemporalType, duration: Temporal.DurationLike): Sup
   return (value as Temporal.PlainDateTime).add(duration);
 }
 
-function startOfDate(date: Temporal.PlainDate, unit: Unit): Temporal.PlainDate {
+function startOfDate(date: Temporal.PlainDate, unit: UnitName): Temporal.PlainDate {
   switch (unit) {
     case "year":
       return date.with({ month: 1, day: 1 });
@@ -92,24 +76,27 @@ function startOfDate(date: Temporal.PlainDate, unit: Unit): Temporal.PlainDate {
 }
 
 /** Rounding options that floor to `unit`. Only time units reach `round`; calendar units go through `startOfDate`. */
-function floor(unit: Unit) {
-  return { smallestUnit: unit as TimeUnit, roundingMode: "floor" } as const;
+function floor(unit: UnitName) {
+  return { smallestUnit: unit as TimeUnitName, roundingMode: "floor" } as const;
 }
 
 /**
- * Passes if `value` has `unit`, so a typo or a unit from the wrong type throws
- * instead of Temporal rounding to something else or silently ignoring it.
+ * Resolves `unit` and passes if `value` has it, so a typo or a unit from the
+ * wrong type throws instead of Temporal rounding to something else or silently
+ * ignoring it.
  *
- * @throws {RangeError} if `value` has no such unit.
+ * @throws {RangeError} if `unit` is no unit, or `value` has no such unit.
  */
-function check(value: SupportedTemporalType, unit: Unit): void {
-  const allowed =
+function resolve(value: SupportedTemporalType, unit: Unit): ResolvedUnit {
+  const resolved = resolveUnit(unit);
+  const hasUnit =
     value instanceof Temporal.PlainDate
-      ? calendarUnits
+      ? resolved.calendar
       : value instanceof Temporal.Instant
-        ? timeUnits
-        : [...calendarUnits, ...timeUnits];
+        ? !resolved.calendar
+        : true;
 
-  if (!allowed.includes(unit))
+  if (!hasUnit)
     throw new RangeError(`Chronos: ${value.constructor.name} has no unit ${String(unit)}`);
+  return resolved;
 }

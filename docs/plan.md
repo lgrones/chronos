@@ -32,7 +32,7 @@ Temporal. Grouped as the dayjs docs group them.
 | -------------- | ----------------------------------------------------------------------------------------------------------- |
 | **query**      | `isBefore`, `isAfter`, `isSame`, `isSameOrBefore`, `isSameOrAfter`, `isBetween` — all with an optional unit |
 | **manipulate** | `clamp(min, max)`, `startOf(unit)`, `endOf(unit)`                                                           |
-| **range**      | `overlaps`, `isInside` — for a start–end pair; shape open, see below                                        |
+| **range**      | `Chronos.range(a, b)`: `overlaps`, `isBetween` — for a start–end pair, see below                            |
 | **parse**      | `Chronos.parse` — non-ISO input into a chosen Temporal type, optional dayjs-style format                    |
 | **statics**    | A shorter `Temporal.Now` — naming open, see below                                                           |
 | **display**    | Something around `Intl` (`format`, `fromNow`). Last; shape undecided.                                       |
@@ -49,8 +49,12 @@ Temporal. Grouped as the dayjs docs group them.
 
 ### Units
 
-The comparisons and `startOf` / `endOf` share one unit set, singular only:
-`year | month | week | day | hour | minute | second | millisecond`.
+The comparisons and `startOf` / `endOf` share one unit set:
+`year | month | week | day | hour | minute | second | millisecond`, each also by
+its plural and the aliases in `src/shared/units.ts` (`d`, `M`, `secs`, …).
+Aliases are ours to add, not the user's: adding one is a line in that table,
+and the types and runtime lookup follow. Case-sensitive, as in dayjs: `M` is
+month, `m` minute.
 
 - `PlainDate`: `year | month | week | day`.
 - `PlainDateTime`, `ZonedDateTime`: all of them.
@@ -62,7 +66,8 @@ that `endOf(unit)` is before `b`. `Chronos(a).isSame(b, "month")` is true for
 any two days in October 2026. On a `ZonedDateTime` the receiver's zone decides
 where the unit starts and ends.
 Signatures follow dayjs where an options object would not read worse:
-`isSame(other, unit?)`, `isBetween(from, to, { inclusive?, unit? })`.
+`isSame(other, unit?)`,
+`isBetween(from, to, { inclusive?, includeStart?, includeEnd?, unit? })`.
 
 ### Ranges
 
@@ -74,29 +79,25 @@ with no start or end, so it cannot overlap anything. Temporal has no type for a
 start–end span, and Chronos adds none (rules 2 and 4): a range is a plain pair of
 Temporal values of the same type.
 
-Sketch:
-
 ```ts
-const booking = [checkIn, checkOut] as const; // or { start, end }
-const season = [seasonStart, seasonEnd] as const;
-
-Chronos(booking).overlaps(season); // any shared moment
-Chronos(booking).isInside(season); // booking lies entirely within season
+Chronos.range(checkIn, checkOut).overlaps(opens, closes); // any shared moment
+Chronos.range(checkIn, checkOut).isBetween(seasonStart, seasonEnd); // within the season
 ```
 
-To settle before building it:
-
-- **Shape.** A tuple `[start, end]` or `{ start, end }`. The object is clearer in
-  stored state and JSON; the tuple is shorter inline.
-- **Endpoints.** Half-open `[start, end)` by default, so 09:00–10:00 and
-  10:00–11:00 do not overlap and back-to-back bookings work. Inclusive as an
-  option, as with `isBetween`.
-- **Units.** Whether `overlaps(other, "day")` is worth having, by the same
-  `startOf` rule as the comparisons.
-- **Reversed or empty ranges.** Throw on `end` before `start`, or swap them as
-  `clamp` does; decide whether `start === end` is an empty range or a single moment.
-- **Receiver overload.** `Chronos(range)` adds overloads for pairs of each type;
-  check the types still reject a mixed pair (`[PlainDate, ZonedDateTime]`).
+- **Receiver.** `Chronos.range(a, b)` is a view for one expression, like
+  `Chronos(value)`. The other range is passed as two raw values, so there is no
+  range shape to store; callers keep `{ start, end }` or a tuple as they like.
+  One overload per type, so a mixed pair is rejected.
+- **Order.** Both ranges are sorted first; a reversed range never throws.
+- **Endpoints.** The same options as `isBetween` on a value: bounds are
+  excluded by default, `inclusive` includes both, `includeStart` and
+  `includeEnd` override it for one. Excluded by default, 09:00–10:00 and
+  10:00–11:00 do not overlap, so back-to-back bookings work.
+- **Equal ends.** A range from `t` to `t` is the moment `t` and behaves as
+  `Chronos(t)`: every range check reduces to the value check for it.
+- **Units.** Each comparison takes the unit as the value comparisons do. An
+  excluded bound excludes its whole unit, so two ranges on one day overlap by
+  `"day"` only with `inclusive`, as dayjs's `isBetween` with a unit.
 
 ### `parse`
 
@@ -156,7 +157,7 @@ dependencies.
   boundaries across a year; unit comparisons at a boundary (23:59:59.999 vs
   00:00 the next day); `isBetween` inclusive and exclusive, either bound order;
   `parse` rejecting 31.02. and input that does not fit the format; ranges that
-  touch at one end, share a boundary, or nest exactly.
+  touch at one end, share a boundary, nest exactly, or have equal ends.
 - Type-level tests with `@ts-expect-error`: cross-type comparison, a string
   argument, a `Chronos` passed as an argument, a calendar unit on `Instant`, a
   time unit on `PlainDate`.
@@ -165,7 +166,7 @@ dependencies.
 
 1. Query and manipulate: `startOf`/`endOf`, then the comparisons with units on
    top of them, and `clamp`. Tested on native and polyfill.
-2. Ranges: settle the shape, then `overlaps` and `isInside`.
+2. Ranges: `Chronos.range(a, b)` with `overlaps` and `isBetween`.
 3. `parse`.
 4. Display — settle what it is first.
 5. Move one real project off dayjs, write down what was missing, cut 1.0.

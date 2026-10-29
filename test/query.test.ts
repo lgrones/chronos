@@ -41,6 +41,18 @@ describe.each(Object.entries(ascending))("%s", (_, make) => {
     expect(chronos(mid).isBetween(mid, mid, inclusive)).toBe(true);
     expect(chronos(late).isBetween(early, mid, inclusive)).toBe(false);
   });
+
+  it("isBetween includes one bound with includeStart or includeEnd, over inclusive", () => {
+    const [early, mid, late] = make();
+    expect(chronos(early).isBetween(late, early, { includeStart: true })).toBe(true);
+    expect(chronos(late).isBetween(early, late, { includeStart: true })).toBe(false);
+    expect(chronos(late).isBetween(late, early, { includeEnd: true })).toBe(true);
+    expect(chronos(early).isBetween(early, late, { includeEnd: true })).toBe(false);
+    expect(chronos(early).isBetween(early, mid, { inclusive: true, includeStart: false })).toBe(
+      false,
+    );
+    expect(chronos(mid).isBetween(early, mid, { inclusive: true, includeStart: false })).toBe(true);
+  });
 });
 
 describe("ZonedDateTime isSame", () => {

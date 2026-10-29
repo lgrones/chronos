@@ -20,5 +20,15 @@ Chronos(date).endOf("month").add({ days: 1 }) satisfies Temporal.PlainDate;
 Chronos(date).startOf("hour");
 // @ts-expect-error calendar unit on Instant
 Chronos(instant).endOf("day");
-// @ts-expect-error plural unit
-Chronos(zoned).startOf("days");
+// @ts-expect-error unknown unit
+Chronos(zoned).startOf("fortnight");
+// @ts-expect-error aliases are case-sensitive
+Chronos(zoned).startOf("Y");
+
+// Aliases follow the receiver's type, as the names do.
+Chronos(date).startOf("M") satisfies Temporal.PlainDate;
+Chronos(instant).endOf("secs") satisfies Temporal.Instant;
+// @ts-expect-error time unit alias on PlainDate
+Chronos(date).startOf("h");
+// @ts-expect-error calendar unit alias on Instant
+Chronos(instant).startOf("days");

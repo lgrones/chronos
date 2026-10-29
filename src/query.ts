@@ -1,5 +1,5 @@
-import { createComparable, type Comparable, type SupportedTemporalType } from "./comparable.ts";
-import { endOf, startOf, type UnitOf } from "./units.ts";
+import { compare as compareExact, type SupportedTemporalType } from "./shared/compare.ts";
+import { endOf, startOf, type UnitOf } from "./shared/bounds.ts";
 
 /**
  * Comparisons against another value of the receiver's type. With a `unit`, the
@@ -29,30 +29,29 @@ export interface Query<T extends SupportedTemporalType = SupportedTemporalType> 
   isBetween(from: T, to: T, options?: { inclusive?: boolean; unit?: UnitOf<T> }): boolean;
 }
 
-/** Builds the query methods for a comparable value. */
-export function query({ value, compare }: Comparable<SupportedTemporalType>): Query {
+/** Builds the query methods for `value`. */
+export function query(value: SupportedTemporalType): Query {
   /**
    * Orders the receiver's `unit` against `other`: negative if it ends before
    * `other`, positive if it starts after, 0 if `other` lies within it.
    */
-  const compareIn = (other: SupportedTemporalType, unit?: UnitOf<SupportedTemporalType>) => {
+  const compare = (other: SupportedTemporalType, unit?: UnitOf<SupportedTemporalType>) => {
     // Compare unfloored first, so `other` is type-checked before it is used.
-    const exact = compare(other);
-    if (unit === undefined) return exact;
+    if (unit === undefined) return compareExact(value, other);
 
-    if (createComparable(endOf(value, unit)).compare(other) < 0) return -1;
-    if (createComparable(startOf(value, unit)).compare(other) > 0) return 1;
+    if (compareExact(endOf(value, unit), other) < 0) return -1;
+    if (compareExact(startOf(value, unit), other) > 0) return 1;
     return 0;
   };
 
-  const isSame: Query["isSame"] = (other, unit) => compareIn(other, unit) === 0;
-  const isBefore: Query["isBefore"] = (other, unit) => compareIn(other, unit) < 0;
-  const isAfter: Query["isAfter"] = (other, unit) => compareIn(other, unit) > 0;
-  const isSameOrBefore: Query["isSameOrBefore"] = (other, unit) => compareIn(other, unit) <= 0;
-  const isSameOrAfter: Query["isSameOrAfter"] = (other, unit) => compareIn(other, unit) >= 0;
+  const isSame: Query["isSame"] = (other, unit) => compare(other, unit) === 0;
+  const isBefore: Query["isBefore"] = (other, unit) => compare(other, unit) < 0;
+  const isAfter: Query["isAfter"] = (other, unit) => compare(other, unit) > 0;
+  const isSameOrBefore: Query["isSameOrBefore"] = (other, unit) => compare(other, unit) <= 0;
+  const isSameOrAfter: Query["isSameOrAfter"] = (other, unit) => compare(other, unit) >= 0;
 
   const isBetween: Query["isBetween"] = (from, to, { inclusive = false, unit } = {}) => {
-    const [start, end] = createComparable(from).compare(to) > 0 ? [to, from] : [from, to];
+    const [start, end] = compareExact(from, to) > 0 ? [to, from] : [from, to];
 
     return inclusive
       ? isSameOrAfter(start, unit) && isSameOrBefore(end, unit)

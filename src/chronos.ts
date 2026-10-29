@@ -1,6 +1,6 @@
 import { manipulate, type Manipulate } from "./manipulate.ts";
 import { query, type Query } from "./query.ts";
-import { createComparable, type SupportedTemporalType } from "./comparable.ts";
+import { assertSupported, type SupportedTemporalType } from "./shared/compare.ts";
 
 /** The methods `Chronos(value)` offers for a receiver of type `T`. */
 type Methods<T extends SupportedTemporalType> = Query<T> & Manipulate<T>;
@@ -23,6 +23,6 @@ export function Chronos(value: Temporal.ZonedDateTime): Methods<Temporal.ZonedDa
 /** Wraps an `Instant` for one expression. See the `PlainDate` overload. */
 export function Chronos(value: Temporal.Instant): Methods<Temporal.Instant>;
 export function Chronos(value: SupportedTemporalType): Methods<SupportedTemporalType> {
-  const comparable = createComparable(value);
-  return { ...query(comparable), ...manipulate(comparable) };
+  assertSupported(value);
+  return { ...query(value), ...manipulate(value) };
 }

@@ -1,4 +1,4 @@
-import type { SupportedTemporalType } from "./comparable.ts";
+import type { SupportedTemporalType } from "./compare.ts";
 
 /** Units a calendar date has. */
 export type CalendarUnit = "year" | "month" | "week" | "day";

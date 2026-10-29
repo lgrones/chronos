@@ -1,5 +1,5 @@
-import { createComparable, type Comparable, type SupportedTemporalType } from "./comparable.ts";
-import { endOf, startOf, type UnitOf } from "./units.ts";
+import { compare, type SupportedTemporalType } from "./shared/compare.ts";
+import { endOf, startOf, type UnitOf } from "./shared/bounds.ts";
 
 /** Operations that yield a new value of the receiver's type, as raw Temporal. */
 export interface Manipulate<T extends SupportedTemporalType = SupportedTemporalType> {
@@ -22,14 +22,13 @@ export interface Manipulate<T extends SupportedTemporalType = SupportedTemporalT
   endOf(unit: UnitOf<T>): T;
 }
 
-/** Builds the manipulate methods for a comparable value. */
-export function manipulate({ value, compare }: Comparable<SupportedTemporalType>): Manipulate {
+/** Builds the manipulate methods for `value`. */
+export function manipulate(value: SupportedTemporalType): Manipulate {
   const clamp: Manipulate["clamp"] = (min, max) => {
     // Compare against the receiver first, so both bounds are type-checked.
-    const [low, high] = [compare(min), compare(max)];
+    const [low, high] = [compare(value, min), compare(value, max)];
 
-    if (createComparable(min).compare(max) > 0)
-      throw new RangeError("Chronos: clamp min is after max");
+    if (compare(min, max) > 0) throw new RangeError("Chronos: clamp min is after max");
 
     if (low < 0) return min;
     if (high > 0) return max;

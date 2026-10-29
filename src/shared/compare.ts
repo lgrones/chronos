@@ -6,59 +6,41 @@ export type SupportedTemporalType =
   | Temporal.Instant;
 
 /**
- * A value with a comparer bound to its Temporal type, like C#'s `IComparable<T>`.
- * Every feature builds on one, so each checks argument types the same way.
- */
-export interface Comparable<T extends SupportedTemporalType> {
-  /** The wrapped value. */
-  readonly value: T;
-  /**
-   * Orders the receiver against `other`: negative before, 0 same, positive after.
-   *
-   * @throws {TypeError} if `other` is not the receiver's Temporal type.
-   */
-  readonly compare: (other: T) => number;
-}
-
-/**
- * Finds the Temporal type of `value` once and binds the comparer to it.
+ * Orders `value` against `other`: negative before, 0 same, positive after.
  *
- * The comparer is the class's own static `compare` with the receiver filled in,
- * plus one guard: Temporal's `compare` is lenient and coerces its arguments, so
+ * Calls the static `compare` of `value`'s Temporal class, plus one guard:
+ * Temporal's `compare` is lenient and coerces its arguments, so
  * `Temporal.PlainDate.compare(date, "2026-10-07")` parses the string and
  * `Temporal.PlainDate.compare(date, zoned)` silently drops time and zone. The
  * types already reject both; the guard makes untyped callers fail loudly too,
  * instead of getting a quiet wrong answer.
  *
- * @throws {TypeError} if `value` is not a supported Temporal type.
+ * @throws {TypeError} if `value` is not a supported Temporal type, or `other`
+ * is not of `value`'s type.
  */
-export function createComparable(value: SupportedTemporalType): Comparable<SupportedTemporalType> {
+export function compare(value: SupportedTemporalType, other: SupportedTemporalType): number {
   const TemporalClass = classOf(value);
+
+  if (!(other instanceof TemporalClass))
+    throw new TypeError(`Chronos: expected ${TemporalClass.name}, got ${describe(other)}`);
+
   // `TemporalClass.compare` is a union of four signatures, callable only with an
-  // argument that is all four types at once. Each class only ever sees its own.
-  const compare = TemporalClass.compare as (
+  // argument that is all four types at once. The guard above makes both one type.
+  const compareSame = TemporalClass.compare as (
     a: SupportedTemporalType,
     b: SupportedTemporalType,
   ) => number;
 
-  /**
-   * Passes `other` through if it has the receiver's Temporal type, so `compare`
-   * never sees anything it would coerce.
-   *
-   * @throws {TypeError} if `other` is a string, another Temporal type or anything else.
-   */
-  const check = (other: SupportedTemporalType): SupportedTemporalType => {
-    if (!(other instanceof TemporalClass)) {
-      throw new TypeError(`Chronos: expected ${TemporalClass.name}, got ${describe(other)}`);
-    }
+  return compareSame(value, other);
+}
 
-    return other;
-  };
-
-  return {
-    value,
-    compare: (other) => compare(value, check(other)),
-  };
+/**
+ * Passes if `value` is a supported Temporal type.
+ *
+ * @throws {TypeError} if it is not.
+ */
+export function assertSupported(value: unknown): asserts value is SupportedTemporalType {
+  classOf(value);
 }
 
 /**

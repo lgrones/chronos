@@ -37,7 +37,7 @@ If you want three of them, lift those three into your project.
 ## Usage
 
 ```ts
-import { Chronos } from "chronos";
+import { Chronos } from "chronos-temporal";
 
 const today = Temporal.Now.plainDateISO();
 

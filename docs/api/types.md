@@ -31,7 +31,7 @@ Chronos(today).isSame(deadline, "hour"); // type error: a PlainDate has no hours
 
 ## Exported types
 
-All are type-only exports from `chronos`.
+All are type-only exports from `chronos-temporal`.
 
 | Type                    | What it is                                                                    |
 | ----------------------- | ----------------------------------------------------------------------------- |

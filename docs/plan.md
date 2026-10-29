@@ -221,9 +221,6 @@ dependencies.
 
 ## Open
 
-- **Name.** Chronos sounds right; `chronos` on npm is likely taken, so a scoped
-  name. Alternatives: Kairos, Tempo.
-- **Publishing.** npm public or GitHub Packages. `private: true` until decided.
 - **First consumer** for milestone 5.
 - **Current-time statics.** Agreed: `Temporal.Now.plainDateISO()` is clunky
   enough to wrap. Open: the names.

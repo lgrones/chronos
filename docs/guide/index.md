@@ -6,7 +6,7 @@ real time zones, immutability. What it lacks is the Day.js reading order.
 does not. Chronos wraps the receiver so methods read left to right:
 
 ```ts
-import { Chronos } from "chronos";
+import { Chronos } from "chronos-temporal";
 
 const today = Temporal.Now.plainDateISO();
 
@@ -77,3 +77,8 @@ flow.
 | `subtract(1, "month")` | `date.subtract({ months: 1 })`          |
 | `isLeapYear()`         | `date.inLeapYear`                       |
 | `dayjs("2026-10-06")`  | `Temporal.PlainDate.from("2026-10-06")` |
+
+For helpers Temporal lacks and Chronos leaves out, such as `diffDays`,
+rounding or `withDayOfWeek`, see
+[temporal-utils](https://www.npmjs.com/package/temporal-utils), from the
+author of `temporal-polyfill`.

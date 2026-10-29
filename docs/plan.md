@@ -33,7 +33,7 @@ Temporal. Grouped as the dayjs docs group them.
 | **query**      | `isBefore`, `isAfter`, `isSame`, `isSameOrBefore`, `isSameOrAfter`, `isBetween` — all with an optional unit |
 | **manipulate** | `clamp(min, max)`, `startOf(unit)`, `endOf(unit)`                                                           |
 | **range**      | `Chronos.range(a, b)`: `overlaps`, `isBetween` — for a start–end pair, see below                            |
-| **parse**      | `Chronos.parse` — non-ISO input into a chosen Temporal type, optional dayjs-style format                    |
+| **parse**      | `Chronos.parse` — input into a chosen Temporal type, by a dayjs-style format; strict ISO by default         |
 | **statics**    | A shorter `Temporal.Now` — naming open, see below                                                           |
 | **display**    | Something around `Intl` (`format`, `fromNow`). Last; shape undecided.                                       |
 
@@ -45,7 +45,7 @@ Temporal. Grouped as the dayjs docs group them.
   `add(3, "days")`; a wrapper would save nothing.
 - `isLeapYear`: `d.inLeapYear`.
 - `isDayjs`: no equivalent; there is no wrapper type to test for.
-- ISO parsing: `Temporal.PlainDate.from("2026-10-06")`.
+- Lenient ISO parsing: `Temporal.PlainDate.from("2026-10-06")`.
 
 ### Units
 
@@ -101,10 +101,10 @@ Chronos.range(checkIn, checkOut).isBetween(seasonStart, seasonEnd); // within th
 
 ### `parse`
 
-Sketch, to settle when milestone 2 starts:
+Input into a chosen Temporal type, by a format.
 
 ```ts
-Chronos.parse("06.10.2026", Temporal.PlainDate); // default format per type, de-AT
+Chronos.parse("2026-10-06", Temporal.PlainDate); // strict ISO by default
 Chronos.parse("6.10.26 14:30", Temporal.PlainDateTime, "D.M.YY HH:mm");
 Chronos.parse("06.10.2026 14:30", Temporal.ZonedDateTime, {
   format: "DD.MM.YYYY HH:mm",
@@ -112,8 +112,27 @@ Chronos.parse("06.10.2026 14:30", Temporal.ZonedDateTime, {
 });
 ```
 
-Tokens follow dayjs `customParseFormat`. Matching is strict: input that does
-not fit the format throws, and so does a date that does not exist (31.02.).
+- **Defaults.** ISO 8601, not a locale: `YYYY-MM-DD` for `PlainDate`,
+  `YYYY-MM-DDTHH:mm` for the rest. Stricter than `from`, which also takes
+  seconds, offsets and annotations, and drops a time `PlainDate` has no field
+  for. Parsing user input in a locale's format means passing that format.
+- **Tokens.** dayjs `customParseFormat`, literal text in `[brackets]`:
+  `YYYY YY M MM D DD H HH h hh A a m mm s ss S SS SSS`. `YY` pivots as dayjs:
+  69–99 are the 1900s. `D` takes one or two digits, `DD` exactly two. Month names (`MMM`, `MMMM`) and offsets (`Z`, `ZZ`) wait until
+  something needs them.
+- **Required fields.** A format needs a year, month and day; no field defaults
+  to today, which would hide a `now` in a parse. Time fields left out are 0. A
+  `PlainDate` format with a time field throws. `h` without `A`/`a` is before
+  noon, as in dayjs.
+- **Zones.** `ZonedDateTime` and `Instant` need a `timeZone`; the input is wall
+  clock in that zone. A time in the spring-forward gap throws, a time that
+  exists twice in autumn is the earlier one (Temporal's `compatible`).
+- **Strict.** Input that does not fit the format throws, including surrounding
+  whitespace; so does a date or time that does not exist (31.02., 24:00).
+- **Reading.** Left to right, as dayjs: a literal must come next, a token's
+  pattern must match there. No backtracking, so a format without separators
+  (`DMYYYY`) only works with fixed-width tokens. Range checks are Temporal's
+  (`overflow: "reject"`).
 
 ## Decisions to settle first
 

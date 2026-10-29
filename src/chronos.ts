@@ -1,4 +1,5 @@
 import { manipulate, type Manipulate } from "./manipulate.ts";
+import { parse } from "./parse.ts";
 import { query, type Query } from "./query.ts";
 import { range } from "./range.ts";
 import { assertSupported } from "./shared/compare.ts";
@@ -30,3 +31,4 @@ export function Chronos(value: SupportedTemporalType): Methods<SupportedTemporal
 }
 
 Chronos.range = range;
+Chronos.parse = parse;

@@ -48,7 +48,7 @@ Chronos(today).isBetween(start, end, { inclusive: true });
 
 Chronos(today).startOf("month").add({ days: 14 }); // returns Temporal: native chain continues
 
-const date = Chronos.parse("06.10.2026", Temporal.PlainDate); // de-AT by default
+const date = Chronos.parse("06.10.2026", Temporal.PlainDate, "DD.MM.YYYY"); // strict ISO by default
 ```
 
 Units follow the receiver. A `PlainDate` takes `year`, `month`, `week`, `day`; an

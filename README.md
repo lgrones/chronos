@@ -8,7 +8,7 @@
     <img alt="Status: early" src="https://img.shields.io/badge/status-early-orange">
   </p>
   <p>
-    <a href="#what-this-is">What this is</a> · <a href="#usage">Usage</a> · <a href="#contract">Contract</a> · <a href="#development">Development</a> · <a href="docs/plan.md">Plan</a>
+    <a href="https://lgrones.github.io/chronos/">Docs</a> · <a href="#what-this-is">What this is</a> · <a href="#usage">Usage</a> · <a href="#contract">Contract</a> · <a href="#development">Development</a> · <a href="docs/plan.md">Plan</a>
   </p>
 </div>
 
@@ -95,6 +95,10 @@ vp test --watch
 # Format, lint and type check; then fix what can be fixed
 vp check
 vp check --fix
+
+# Docs site, live or built to docs/.vitepress/dist
+vp run docs:dev
+vp run docs:build
 
 # Build dist/
 vp pack

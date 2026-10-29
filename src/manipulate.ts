@@ -3,12 +3,8 @@ import { endOf, startOf, type UnitOf } from "./shared/bounds.ts";
 
 /** Operations that yield a new value of the receiver's type, as raw Temporal. */
 export interface Manipulate<T extends SupportedTemporalType = SupportedTemporalType> {
-  /**
-   * The receiver limited to `min`–`max`.
-   *
-   * @throws {RangeError} if `min` is after `max`.
-   */
-  clamp(min: T, max: T): T;
+  /** The receiver limited to the range between `a` and `b`, in either order. */
+  clamp(a: T, b: T): T;
   /**
    * The first value of the `unit` that contains the receiver. Weeks start on
    * Monday. On a `ZonedDateTime` a day starts when its zone says, which is not
@@ -24,14 +20,12 @@ export interface Manipulate<T extends SupportedTemporalType = SupportedTemporalT
 
 /** Builds the manipulate methods for `value`. */
 export function manipulate(value: SupportedTemporalType): Manipulate {
-  const clamp: Manipulate["clamp"] = (min, max) => {
+  const clamp: Manipulate["clamp"] = (a, b) => {
     // Compare against the receiver first, so both bounds are type-checked.
-    const [low, high] = [compare(value, min), compare(value, max)];
+    const [toA, toB] = [compare(value, a), compare(value, b)];
 
-    if (compare(min, max) > 0) throw new RangeError("Chronos: clamp min is after max");
-
-    if (low < 0) return min;
-    if (high > 0) return max;
+    if (toA < 0 && toB < 0) return compare(a, b) < 0 ? a : b;
+    if (toA > 0 && toB > 0) return compare(a, b) > 0 ? a : b;
     return value;
   };
 

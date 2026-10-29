@@ -93,8 +93,8 @@ To settle before building it:
   option, as with `isBetween`.
 - **Units.** Whether `overlaps(other, "day")` is worth having, by the same
   `startOf` rule as the comparisons.
-- **Reversed or empty ranges.** Throw on `end` before `start`, as `clamp` does;
-  decide whether `start === end` is an empty range or a single moment.
+- **Reversed or empty ranges.** Throw on `end` before `start`, or swap them as
+  `clamp` does; decide whether `start === end` is an empty range or a single moment.
 - **Receiver overload.** `Chronos(range)` adds overloads for pairs of each type;
   check the types still reject a mixed pair (`[PlainDate, ZonedDateTime]`).
 

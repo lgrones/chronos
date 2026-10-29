@@ -9,9 +9,11 @@ describe.each(Object.entries(ascending))("%s", (_, make) => {
     expect(chronos(late).clamp(early, mid)).toBe(mid);
   });
 
-  it("clamp throws when min is after max", () => {
+  it("clamp accepts the bounds in either order", () => {
     const [early, mid, late] = make();
-    expect(() => chronos(mid).clamp(late, early)).toThrow(RangeError);
+    expect(chronos(mid).clamp(late, early)).toBe(mid);
+    expect(chronos(early).clamp(late, mid)).toBe(mid);
+    expect(chronos(late).clamp(mid, early)).toBe(mid);
   });
 });
 

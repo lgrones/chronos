@@ -100,6 +100,9 @@ vp check --fix
 vp run docs:dev
 vp run docs:build
 
+# Release: bump the version, tag and push; the Release workflow publishes
+vp run release
+
 # Build dist/
 vp pack
 ```

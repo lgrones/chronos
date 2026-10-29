@@ -33,7 +33,8 @@
     "prepare": "vp config",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "release": "bumpp"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

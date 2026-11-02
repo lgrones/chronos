@@ -52,3 +52,8 @@ Chronos(date).isSame(date, "hour");
 Chronos(instant).isBefore(instant, "day");
 // @ts-expect-error calendar unit on Instant
 Chronos(instant).isBetween(instant, instant, { unit: "month" });
+
+// isToday and friends take no argument, so every type has them, Instant included.
+Chronos(date).isToday() satisfies boolean;
+Chronos(instant).isTomorrow() satisfies boolean;
+Chronos(zoned).isYesterday() satisfies boolean;

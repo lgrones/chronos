@@ -1,12 +1,10 @@
 import { compareExact } from "./shared/compare.ts";
 import { tokenizer } from "./shared/tokens.ts";
 import type { SupportedTemporalType } from "./shared/types.ts";
+import { defaultTimeZone } from "./shared/zone.ts";
 
 /** The locale text is written in unless the caller names one. */
 const defaultLocale = "de-AT";
-
-/** The time zone used where a value has none and the caller names none. */
-const defaultTimeZone = "UTC";
 
 /** A token pattern, which an `Instant` does not take: it has no wall clock to read. */
 type Pattern<T extends SupportedTemporalType> = T extends Temporal.Instant ? never : string;

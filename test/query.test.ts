@@ -145,3 +145,31 @@ describe("comparisons with a unit", () => {
     expect(() => chronos(date).isSame("2026-10-06", "day")).toThrow(TypeError);
   });
 });
+
+describe("isToday / isTomorrow / isYesterday", () => {
+  it("reads today for the receiver's type", () => {
+    const date = Temporal.Now.plainDateISO("UTC");
+    expect(Chronos(date).isToday()).toBe(true);
+    expect(Chronos(date.add({ days: 1 })).isTomorrow()).toBe(true);
+    expect(Chronos(date.subtract({ days: 1 })).isYesterday()).toBe(true);
+    expect(Chronos(date.add({ days: 1 })).isToday()).toBe(false);
+    expect(Chronos(date).isTomorrow()).toBe(false);
+    expect(Chronos(date).isYesterday()).toBe(false);
+
+    expect(Chronos(Temporal.Now.plainDateTimeISO("UTC")).isToday()).toBe(true);
+    expect(Chronos(Temporal.Now.instant().add({ hours: 24 })).isTomorrow()).toBe(true);
+  });
+
+  it("reads today in the zone of a ZonedDateTime", () => {
+    // UTC+14: midnight there is 10:00 the day before in UTC.
+    const midnight = Temporal.Now.zonedDateTimeISO("Pacific/Kiritimati").startOfDay();
+    expect(Chronos(midnight).isToday()).toBe(true);
+    expect(Chronos(midnight.subtract({ nanoseconds: 1 })).isYesterday()).toBe(true);
+    expect(Chronos(midnight.add({ days: 1 })).isTomorrow()).toBe(true);
+  });
+
+  it("ignores the receiver's calendar", () => {
+    const today = Temporal.Now.plainDateISO("UTC").withCalendar("gregory");
+    expect(Chronos(today).isToday()).toBe(true);
+  });
+});

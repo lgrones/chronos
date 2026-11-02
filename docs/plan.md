@@ -28,14 +28,14 @@ Break 2 or 4 and the wrapper escapes its expression — that is dayjs again.
 Port from dayjs what Temporal cannot do in one readable step; leave the rest to
 Temporal. Grouped as the dayjs docs group them.
 
-| Feature        | Methods                                                                                                     |
-| -------------- | ----------------------------------------------------------------------------------------------------------- |
-| **query**      | `isBefore`, `isAfter`, `isSame`, `isSameOrBefore`, `isSameOrAfter`, `isBetween` — all with an optional unit |
-| **manipulate** | `clamp(min, max)`, `startOf(unit)`, `endOf(unit)`                                                           |
-| **range**      | `Chronos.range(a, b)`: `overlaps`, `isBetween` — for a start–end pair, see below                            |
-| **parse**      | `Chronos.parse` — input into a chosen Temporal type, by a dayjs-style format; strict ISO by default         |
-| **statics**    | A shorter `Temporal.Now` — naming open, see below                                                           |
-| **display**    | `format` by pattern or `Intl` options, `from` / `fromNow` — see below                                       |
+| Feature        | Methods                                                                                                                                             |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **query**      | `isBefore`, `isAfter`, `isSame`, `isSameOrBefore`, `isSameOrAfter`, `isBetween` — all with an optional unit; `isToday`, `isTomorrow`, `isYesterday` |
+| **manipulate** | `clamp(min, max)`, `startOf(unit)`, `endOf(unit)`                                                                                                   |
+| **range**      | `Chronos.range(a, b)`: `overlaps`, `isBetween` — for a start–end pair, see below                                                                    |
+| **parse**      | `Chronos.parse` — input into a chosen Temporal type, by a dayjs-style format; strict ISO by default                                                 |
+| **statics**    | A shorter `Temporal.Now` — naming open, see below                                                                                                   |
+| **display**    | `format` by pattern or `Intl` options, `from` / `fromNow` — see below                                                                               |
 
 `PlainTime` and `PlainYearMonth` wait until something needs them.
 

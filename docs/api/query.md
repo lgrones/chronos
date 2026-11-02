@@ -89,6 +89,23 @@ Chronos(start).isBetween(end, start, { inclusive: true }); // true: either order
 | `includeEnd`   | `boolean`   | Whether the later bound counts; overrides `inclusive`      |
 | `unit`         | `UnitOf<T>` | Compare by unit; an excluded bound excludes its whole unit |
 
+## isToday, isTomorrow, isYesterday
+
+```ts
+isToday(): boolean
+isTomorrow(): boolean
+isYesterday(): boolean
+```
+
+Whether the receiver falls on today, tomorrow or yesterday. Only the date
+counts, so every type has them, `Instant` included. Today is read in the
+receiver's zone on a `ZonedDateTime`, otherwise in UTC, as in `fromNow`.
+
+```ts
+Chronos(Temporal.Now.plainDateISO("UTC")).isToday(); // true
+Chronos(Temporal.Now.instant().add({ hours: 24 })).isTomorrow(); // true
+```
+
 ## Errors
 
 All methods throw a `TypeError` if an argument is not of the receiver's type,
